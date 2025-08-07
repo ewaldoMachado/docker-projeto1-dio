@@ -1,0 +1,49 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    container_name: mysql_container
+    environment:
+      MYSQL_ROOT_PASSWORD: "Senha123"
+      MYSQL_DATABASE: "meu_banco"
+    volumes:
+      - dados_mysql:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3306:3306"
+    networks:
+      - minha-rede
+
+  web:
+    image: php:8.2-apache
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: php_apache
+    volumes:
+      - ./src:/var/www/html
+    ports:
+      - "4500:80"
+    depends_on:
+      - db
+    networks:
+      - minha-rede
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    environment:
+      PMA_PASSWORD: "Senha123"
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    networks:
+      - minha-rede
+
+volumes:
+  dados_mysql:
+
+networks:
+  minha-rede:
+    driver: bridge
